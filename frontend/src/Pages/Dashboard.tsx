@@ -44,7 +44,7 @@ export const Dashboard = () => {
 
   useEffect(() => {
     fetchData();
-    const intervalId = setInterval(fetchData, 60000); // Poll every 60 sec
+    const intervalId = setInterval(fetchData, 2000); // Poll every 60 sec
     return () => clearInterval(intervalId);
   }, [fetchData]);
 
