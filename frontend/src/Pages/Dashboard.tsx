@@ -6,7 +6,7 @@ import axios from "axios";
 
 // Axios instance
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "https://esdbackend.velloresemicon.com/api",
   timeout: 10000,
 });
 
