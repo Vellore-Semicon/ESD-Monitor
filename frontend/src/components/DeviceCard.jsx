@@ -15,8 +15,23 @@ export const DeviceCard = ({ device }) => {
     return "bg-[#D20C2D]";
   };
 
+  // const formatDate = (dateString) => {
+  //   const date = new Date(dateString);
+  //   return date.toLocaleDateString("en-GB", {
+  //     day: "2-digit",
+  //     month: "2-digit",
+  //     year: "numeric",
+  //   });
+  // };
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
+    if (!dateString || dateString.length !== 8) return "Invalid date";
+
+    const year = parseInt(dateString.slice(0, 4), 10);
+    const month = parseInt(dateString.slice(4, 6), 10) - 1; // JS months are 0-indexed
+    const day = parseInt(dateString.slice(6, 8), 10);
+
+    const date = new Date(year, month, day);
+
     return date.toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "2-digit",

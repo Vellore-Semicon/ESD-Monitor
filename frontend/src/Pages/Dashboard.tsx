@@ -12,6 +12,7 @@ const api = axios.create({
 
 export const Dashboard = () => {
   const [data, setData] = useState([]);
+  console.log(data)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState("");
@@ -108,9 +109,9 @@ export const Dashboard = () => {
           </div>
 
           {/* Feedback */}
-          {loading && (
+          {/* {loading && (
             <p className="text-center text-sm text-gray-500">Loading...</p>
-          )}
+          )} */}
           {error && <p className="text-center text-sm text-red-500">{error}</p>}
           {!loading && data.length === 0 && (
             <p className="text-center text-sm text-gray-500">
