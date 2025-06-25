@@ -75,7 +75,7 @@ export const DeviceCard = ({ device }) => {
 
           <div className="flex justify-between items-center">
             <span className="text-gray-600">Operator 1 :</span>
-            <StatusBadge status={device["operator 1"]} />
+            <StatusBadge status={device.Operator1} />
           </div>
 
           <div className="flex justify-between items-center">

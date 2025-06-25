@@ -12,7 +12,7 @@ const api = axios.create({
 
 export const Dashboard = () => {
   const [data, setData] = useState([]);
-  console.log(data)
+  console.log(data);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState("");
@@ -129,7 +129,7 @@ export const Dashboard = () => {
                   Connected: device.Connected,
                   Date: device.Date,
                   Time: device.Time,
-                  "operator 1": device.Operator1,
+                  Operator1: device.Operator1,
                   Operator2: device.Operator2,
                   Mat1: device.Mat1,
                   Mat2: device.Mat2,
