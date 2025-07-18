@@ -4,7 +4,7 @@ const cors = require("cors");
 
 // Express Setup
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 6000;
 
 app.use(cors());
 app.use(express.json());
@@ -32,6 +32,7 @@ const deviceLogSchema = new mongoose.Schema({
   Connected: String,
   Date: String,
   Time: String,
+  MasterCode: String,
   Operator1: String,
   Operator2: String,
   Mat1: String,

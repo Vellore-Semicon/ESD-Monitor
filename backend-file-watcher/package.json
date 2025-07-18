@@ -7,7 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "mongoose": "^6.0.12",
+    "@serialport/parser-readline": "^13.0.0",
+    "dotenv": "^17.2.0",
+    "fs-extra": "^11.3.0",
+    "mongoose": "^6.13.8",
     "node-cron": "^3.0.2",
     "serialport": "^13.0.0",
     "xlsx": "^0.18.5"
