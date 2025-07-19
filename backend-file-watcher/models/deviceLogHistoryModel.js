@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const historySchema = new mongoose.Schema({
+  customerId: { type: mongoose.Schema.Types.ObjectId, ref: "CustomerUser" },
   DeviceID: Number,
   Connected: String,
   Date: String,
