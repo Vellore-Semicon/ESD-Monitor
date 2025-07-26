@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, User, Eye, EyeOff } from "lucide-react";
+import axios from "axios";
+import api from "../utils/api";
 
 const Login = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState(""); // using email as per API
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -16,18 +18,36 @@ const Login = () => {
     setError("");
 
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // === Basic validation (commented out as requested) ===
+      // if (!email || !password) {
+      //   setError("Please enter both email and password.");
+      //   setIsLoading(false);
+      //   return;
+      // }
+      // if (!/^\S+@\S+\.\S+$/.test(email)) {
+      //   setError("Please enter a valid email address.");
+      //   setIsLoading(false);
+      //   return;
+      // }
 
-      // Check credentials
-      if (username === "admin velloresemicon" && password === "admin@1234") {
+      const response = await api.post("/customer/login", {
+        email,
+        password,
+      });
+
+      const data = response.data;
+      // Assuming response includes a token or user info
+      if (data && data.token) {
         localStorage.setItem("isAuthenticated", "true");
+        localStorage.setItem("token", data.token); // store token
         navigate("/dashboard");
       } else {
-        setError("Invalid username or password");
+        setError("Login failed. Invalid response from server.");
       }
     } catch (err) {
-      setError("Login failed. Please try again.");
+      setError(
+        err.response?.data?.message || "Login failed. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -43,8 +63,9 @@ const Login = () => {
               src="/Logo-Png-1-250x39.png"
               alt="Company Logo"
               onError={(e) => {
-                e.target.onerror = null;
-                e.target.src =
+                const target = e.target as HTMLImageElement;
+                target.onerror = null;
+                target.src =
                   "https://via.placeholder.com/250x39?text=Vellore+Semicon";
               }}
             />
@@ -62,25 +83,25 @@ const Login = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Username Field */}
+            {/* Email Field */}
             <div className="space-y-2">
               <label
-                htmlFor="username"
+                htmlFor="email"
                 className="text-sm font-medium text-gray-700 block"
               >
-                Username
+                Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <User className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="Enter your username"
+                  placeholder="Enter your email"
                   required
                 />
               </div>

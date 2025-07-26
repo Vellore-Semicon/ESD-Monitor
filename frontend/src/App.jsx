@@ -65,7 +65,7 @@ function App() {
     try {
       const [hours, minutes] = timeString.split(":");
       const date = new Date();
-      date.setHours(parseInt(hours), parseInt(minutes);
+      date.setHours(parseInt(hours), parseInt(minutes));
       return date.toLocaleTimeString("en-IN", {
         hour: "2-digit",
         minute: "2-digit",
