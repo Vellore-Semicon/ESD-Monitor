@@ -86,10 +86,10 @@ const cleanupOldLogs = async () => {
 
 const processSerialData = async (line) => {
   try {
-    console.log(`📥 Received: ${line.trim()}`);
+    console.log(`📥 Raw Input: ${line.trim()}`);
 
     const clean = line.replace(":", "").trim();
-    const parts = clean.split(/\s+/); // split on tabs or spaces
+    const parts = clean.split(","); // NEW
 
     const deviceID = parseInt(parts[0], 10);
     const rawValues = parts.slice(1).map(mapValue);
@@ -109,6 +109,11 @@ const processSerialData = async (line) => {
       logEntry.Machine = rawValues[0];
       logEntry.Connected =
         rawValues[0] === "Yes" ? "Yes" : rawValues[0] === "NC" ? "NC" : "No";
+
+      console.log("📋 Parsed Short Machine Entry:");
+      console.log(`   DeviceID  : ${deviceID}`);
+      console.log(`   Machine   : ${logEntry.Machine}`);
+      console.log(`   Connected : ${logEntry.Connected}`);
     } else {
       const keys = ["Operator1", "Operator2", "Mat1", "Mat2"];
       keys.forEach((key, idx) => {
@@ -118,6 +123,14 @@ const processSerialData = async (line) => {
       const allYes = rawValues.every((v) => v === "Yes");
       const allNC = rawValues.every((v) => v === "NC");
       logEntry.Connected = allYes ? "Yes" : allNC ? "NC" : "No";
+
+      console.log("📋 Parsed Full Entry:");
+      console.log(`   DeviceID  : ${deviceID}`);
+      console.log(`   Operator1 : ${logEntry.Operator1}`);
+      console.log(`   Operator2 : ${logEntry.Operator2}`);
+      console.log(`   Mat1      : ${logEntry.Mat1}`);
+      console.log(`   Mat2      : ${logEntry.Mat2}`);
+      console.log(`   Connected : ${logEntry.Connected}`);
     }
 
     await DeviceLog.findOneAndUpdate(
@@ -130,9 +143,9 @@ const processSerialData = async (line) => {
     await appendToCSV(logEntry);
     await cleanupOldLogs();
 
-    console.log("✅ Logged:", logEntry);
+    console.log("✅ Entry successfully processed and logged.\n");
   } catch (err) {
-    console.error("❌ Error:", err.message);
+    console.error("❌ Error in processing serial data:", err.message);
   }
 };
 

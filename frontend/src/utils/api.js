@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://esdbackend.velloresemicon.com",
+  baseURL: "https://app.velloresemicon.com/api",
   timeout: 10000,
 });
 
