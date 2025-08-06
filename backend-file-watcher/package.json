@@ -2,8 +2,10 @@
   "name": "backend-file-processor",
   "version": "1.0.0",
   "main": "processor.js",
+  "bin": "processor.js",
   "scripts": {
     "start": "node processor.js",
+    "exe": "pkg . --out-path dist/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -14,5 +16,22 @@
     "node-cron": "^3.0.2",
     "serialport": "^13.0.0",
     "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  },
+  "pkg": {
+    "assets": [
+      "config/**/*",
+      "data/**/*",
+      "models/**/*",
+      "services/**/*",
+      "utils/**/*",
+      ".env"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ],
+    "outputPath": "dist"
   }
 }

@@ -13,6 +13,15 @@ const historySchema = new mongoose.Schema(
     Date: String,
     Time: String,
     MasterCode: String,
+    shift: [
+      {
+        ShiftName: String,
+        StartTime: String, // Format: HH:MM:SS
+        EndTime: String, // Format: HH:MM:SS
+        Operator1Name: String,
+        Operator2Name: String,
+      },
+    ],
     Operator1: String,
     Operator2: String,
     Mat1: String,

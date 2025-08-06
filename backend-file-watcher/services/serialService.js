@@ -3,6 +3,7 @@ const path = require("path");
 const DeviceLog = require("../models/deviceLogModel");
 const DeviceLogHistory = require("../models/deviceLogHistoryModel");
 const { getCurrentDate, getCurrentTime } = require("../utils/datetime");
+const mongoose = require("mongoose");
 
 const LOG_DIR = path.join(__dirname, "../logs");
 fs.ensureDirSync(LOG_DIR);
@@ -133,13 +134,15 @@ const processSerialData = async (line) => {
       console.log(`   Connected : ${logEntry.Connected}`);
     }
 
-    await DeviceLog.findOneAndUpdate(
+    const data = await DeviceLog.findOneAndUpdate(
       { DeviceID: deviceID },
       { $set: logEntry },
       { upsert: true, new: true }
     );
 
-    await DeviceLogHistory.create(logEntry);
+    logEntry.customerId = data.customerId;
+    const historyEntry = await DeviceLogHistory.create(logEntry);
+    console.log(historyEntry);
     await appendToCSV(logEntry);
     await cleanupOldLogs();
 
