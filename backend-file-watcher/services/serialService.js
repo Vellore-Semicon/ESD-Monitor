@@ -108,8 +108,9 @@ const processSerialData = async (line) => {
 
     if (isShortMachine) {
       logEntry.Machine = rawValues[0];
-      logEntry.Connected =
-        rawValues[0] === "Yes" ? "Yes" : rawValues[0] === "NC" ? "NC" : "No";
+      // logEntry.Connected =
+      //   rawValues[0] === "Yes" ? "Yes" : rawValues[0] === "NC" ? "NC" : "No";
+      logEntry.Connected = "Yes"; //Setto yes if i get entry
 
       console.log("📋 Parsed Short Machine Entry:");
       console.log(`   DeviceID  : ${deviceID}`);
@@ -121,9 +122,10 @@ const processSerialData = async (line) => {
         logEntry[key] = rawValues[idx] || "NC";
       });
 
-      const allYes = rawValues.every((v) => v === "Yes");
-      const allNC = rawValues.every((v) => v === "NC");
-      logEntry.Connected = allYes ? "Yes" : allNC ? "NC" : "No";
+      // const allYes = rawValues.every((v) => v === "Yes");
+      // const allNC = rawValues.every((v) => v === "NC");
+      // logEntry.Connected = allYes ? "Yes" : allNC ? "NC" : "No";
+      logEntry.Connected = "Yes"; //Setto yes if i get entry
 
       console.log("📋 Parsed Full Entry:");
       console.log(`   DeviceID  : ${deviceID}`);

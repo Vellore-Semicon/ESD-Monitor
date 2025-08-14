@@ -1,28 +1,43 @@
+// index.js
+require("dotenv").config();
+const connectDB = require("./config/db");
 const { SerialPort } = require("serialport");
 const { ReadlineParser } = require("@serialport/parser-readline");
-const connectDB = require("./config/db");
 const { processSerialData } = require("./services/serialService");
-require("dotenv").config();
 
-// Connect to MongoDB
-connectDB();
+let port;
+let parser;
 
-// Setup serial port
-const port = new SerialPort({
-  path: process.env.SERIAL_PORT || "COM3",
-  baudRate: parseInt(process.env.BAUD_RATE) || 115200,
-});
+function openPort() {
+  console.log("🔌 Opening serial port...");
 
-const parser = port.pipe(new ReadlineParser({ delimiter: ":" }));
+  port = new SerialPort({
+    path: process.env.SERIAL_PORT || "COM3",
+    baudRate: parseInt(process.env.BAUD_RATE) || 115200,
+    autoOpen: true,
+  });
 
-// Handle serial data
-parser.on("data", async (line) => {
-  await processSerialData(line);
-});
+  parser = port.pipe(new ReadlineParser({ delimiter: ":" }));
 
-// Graceful shutdown
-process.on("SIGINT", async () => {
-  console.log("\n🛑 Shutting down...");
-  await port.close();
-  process.exit(0);
-});
+  parser.on("data", async (line) => {
+    console.log("📩 Data:", line);
+    await processSerialData(line);
+  });
+
+  port.on("close", () => {
+    console.log("⚠ Port closed. Retrying in 3s...");
+    setTimeout(openPort, 3000);
+  });
+
+  port.on("error", (err) => {
+    console.error("❌ Serial port error:", err.message);
+    console.log("Retrying in 3s...");
+    setTimeout(openPort, 3000);
+  });
+}
+
+// Connect to MongoDB first, then open serial port
+(async () => {
+  await connectDB();
+  openPort();
+})();
