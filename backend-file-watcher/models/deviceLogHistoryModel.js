@@ -6,6 +6,7 @@ const historySchema = new mongoose.Schema(
     masterDeviceId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "MasterDevice",
+      default: null,
     },
     DeviceID: Number,
     deviceName: String,
