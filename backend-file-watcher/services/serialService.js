@@ -4,6 +4,7 @@ const DeviceLog = require("../models/deviceLogModel");
 const DeviceLogHistory = require("../models/deviceLogHistoryModel");
 const { getCurrentDate, getCurrentTime } = require("../utils/datetime");
 const mongoose = require("mongoose");
+const { log } = require("console");
 
 const LOG_DIR = path.join(__dirname, "../logs");
 fs.ensureDirSync(LOG_DIR);
@@ -90,7 +91,7 @@ const processSerialData = async (line) => {
     console.log(`📥 Raw Input: ${line.trim()}`);
 
     const clean = line.replace(":", "").trim();
-    const parts = clean.split(","); // NEW
+    const parts = clean.split(",");
 
     const deviceID = parseInt(parts[0], 10);
     const rawValues = parts.slice(1).map(mapValue);
@@ -104,48 +105,84 @@ const processSerialData = async (line) => {
       Date: date,
       Time: time,
       MasterCode: process.env.MASTER_CODE || "DefaultMasterCode",
+      FetchedAt: new Date(),
     };
 
     if (isShortMachine) {
       logEntry.Machine = rawValues[0];
-      // logEntry.Connected =
-      //   rawValues[0] === "Yes" ? "Yes" : rawValues[0] === "NC" ? "NC" : "No";
-      logEntry.Connected = "Yes"; //Setto yes if i get entry
-
-      console.log("📋 Parsed Short Machine Entry:");
-      console.log(`   DeviceID  : ${deviceID}`);
-      console.log(`   Machine   : ${logEntry.Machine}`);
-      console.log(`   Connected : ${logEntry.Connected}`);
+      logEntry.Connected = "Yes";
     } else {
       const keys = ["Operator1", "Operator2", "Mat1", "Mat2"];
       keys.forEach((key, idx) => {
         logEntry[key] = rawValues[idx] || "NC";
       });
-
-      // const allYes = rawValues.every((v) => v === "Yes");
-      // const allNC = rawValues.every((v) => v === "NC");
-      // logEntry.Connected = allYes ? "Yes" : allNC ? "NC" : "No";
-      logEntry.Connected = "Yes"; //Setto yes if i get entry
-
-      console.log("📋 Parsed Full Entry:");
-      console.log(`   DeviceID  : ${deviceID}`);
-      console.log(`   Operator1 : ${logEntry.Operator1}`);
-      console.log(`   Operator2 : ${logEntry.Operator2}`);
-      console.log(`   Mat1      : ${logEntry.Mat1}`);
-      console.log(`   Mat2      : ${logEntry.Mat2}`);
-      console.log(`   Connected : ${logEntry.Connected}`);
+      logEntry.Connected = "Yes";
     }
 
-    const data = await DeviceLog.findOneAndUpdate(
+    // 1️⃣ Fetch existing device log (old values)
+    const existing = await DeviceLog.findOne({ DeviceID: deviceID });
+    // console.log(
+    //   "🔍 Existing Log (before update):",
+    //   existing ? existing.toObject() : "None (new device)"
+    // );
+
+    // 2️⃣ Compare before updating
+    let hasChanged = false;
+    if (!existing) {
+      console.log("🆕 First-time entry → marking as changed");
+      hasChanged = true;
+    } else {
+      const keysToCheck = [
+        "Operator1",
+        "Operator2",
+        "Mat1",
+        "Mat2",
+        "Machine",
+        "Connected",
+      ];
+
+      console.log("🔎 Comparing fields (ignoring time)...");
+      keysToCheck.forEach((key) => {
+        const oldVal = existing[key];
+        const newVal = logEntry[key];
+        if (oldVal !== newVal) {
+          console.log(
+            `⚡ Change detected in ${key}: "${oldVal}" → "${newVal}"`
+          );
+        } else {
+          console.log(`✅ No change in ${key}: still "${newVal}"`);
+        }
+      });
+
+      hasChanged = keysToCheck.some((key) => existing[key] !== logEntry[key]);
+    }
+
+    console.log(
+      "📊 Change Status:",
+      hasChanged ? "CHANGED ✅" : "UNCHANGED ❌"
+    );
+
+    // 3️⃣ Now update DeviceLog (after comparison)
+    const updatedDeviceLog = await DeviceLog.findOneAndUpdate(
       { DeviceID: deviceID },
       { $set: logEntry },
       { upsert: true, new: true }
     );
+    //console.log("🆕 Updated DeviceLog:", updatedDeviceLog.toObject());
+    logEntry.customerId = updatedDeviceLog.customerId;
+    logEntry.masterDeviceId = updatedDeviceLog.masterDeviceId;
 
-    logEntry.customerId = data.customerId;
-    const historyEntry = await DeviceLogHistory.create(logEntry);
-    console.log(historyEntry);
-    await appendToCSV(logEntry);
+    // 4️⃣ Only record history and append CSV if data changed
+    if (hasChanged) {
+      const historyEntry = await DeviceLogHistory.create(logEntry);
+      //console.log("📚 History Entry Recorded:", historyEntry.toObject());
+
+      await appendToCSV(logEntry);
+      console.log("📑 CSV Updated with new entry.");
+    } else {
+      console.log("ℹ️ No changes detected. Skipping history & CSV logging.");
+    }
+
     await cleanupOldLogs();
 
     console.log("✅ Entry successfully processed and logged.\n");
